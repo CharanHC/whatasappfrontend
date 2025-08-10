@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* The .msg-left and .msg-right classes are removed as they are not used */
+/* .msg-left { */
+/* @apply bg-white text-gray-800 rounded-lg p-2 max-w-[70%] shadow; */
+/* } */
+/* .msg-right { */
+/* @apply bg-[#DCF8C6] text-gray-900 rounded-lg p-2 max-w-[70%] ml-auto shadow; */
+/* } */
