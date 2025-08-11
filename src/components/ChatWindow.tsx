@@ -41,11 +41,11 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
   }, [waId, api]);
 
   // Auto-scroll on new messages
-  useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
+  //useEffect(() => {
+    //if (chatEndRef.current) {
+      //chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    //}
+  //}, [messages]);
 
   const deleteMessage = (id: string) => {
     if (id.startsWith("temp-")) {
