@@ -38,9 +38,9 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
   }, [waId, api]);
 
   // Auto-scroll on messages change
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+ // useEffect(() => {
+   // chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  //}, [messages]);
 
   // Delete message function with guard for temp messages
   const deleteMessage = (id: string) => {
