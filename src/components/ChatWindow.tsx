@@ -36,9 +36,9 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
     return () => clearInterval(intervalId);
   }, [waId, api]);
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  //useEffect(() => {
+    //chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  //}, [messages]);
 
   const deleteMessage = (id: string) => {
     setMessages((prev) => prev.filter((m) => m._id !== id));
