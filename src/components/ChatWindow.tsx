@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import "./chatwindow.css";
 
@@ -13,9 +13,10 @@ interface Message {
 interface ChatWindowProps {
   waId: string;
   name: string;
+  api: string; // The API URL is now passed as a prop
 }
 
-export default function ChatWindow({ waId, name }: ChatWindowProps) {
+export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement | null>(null);
@@ -26,7 +27,7 @@ export default function ChatWindow({ waId, name }: ChatWindowProps) {
 
     const fetchMessages = () => {
       axios
-        .get(`${import.meta.env.VITE_API_URL}/conversations/${waId}/messages`)
+        .get(`${api}/conversations/${waId}/messages`)
         .then((res) => setMessages(res.data))
         .catch((err) => console.error("Fetch messages error:", err));
     };
@@ -34,82 +35,94 @@ export default function ChatWindow({ waId, name }: ChatWindowProps) {
     fetchMessages();
     const intervalId = setInterval(fetchMessages, 2000);
     return () => clearInterval(intervalId);
-  }, [waId]);
+  }, [waId, api]);
 
   // Auto-scroll on messages change
-  //useEffect(() => {
-   // chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  //}, [messages]);
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  const renderTicks = (status: string) => {
-    switch (status) {
-      case "sent":
-        return <span className="tick-icon">✓</span>;
-      case "delivered":
-        return <span className="tick-icon">✓✓</span>;
-      case "read":
-        return <span className="tick-icon read">✓✓</span>;
-      default:
-        return null;
+  // Delete message function with guard for temp messages
+  const deleteMessage = (id: string) => {
+    if (id.startsWith("temp-")) {
+      // Just remove locally if it's a temp message (not saved to DB)
+      setMessages((prev) => prev.filter((m) => m._id !== id));
+      return;
     }
-  };
 
-  const deleteMessage = (_id: string) => {
+    // Optimistic remove from UI
+    setMessages((prev) => prev.filter((m) => m._id !== id));
+
     axios
-      .delete(`${import.meta.env.VITE_API_URL}/messages/${_id}`)
-      .then(() => {
-        setMessages((prevMessages) =>
-          prevMessages.filter((msg) => msg._id !== _id)
-        );
-      })
-      .catch((err) => console.error("Delete message error:", err));
+      .delete(`${api}/messages/${id}`)
+      .catch((err) => {
+        console.error("Delete error:", err);
+        // Optionally, rollback UI removal if delete failed:
+        // fetch latest messages again or re-add message locally
+      });
   };
-  
-  const sendMessage = () => {
-    if (!input.trim()) return;
 
-    const myId = "929967673820";
-    const newMessage = {
-      _id: `temp-${Date.now()}`,
-      from: myId,
-      body: input,
+  // Send message with optimistic UI
+  const sendMessage = () => {
+    const text = input.trim();
+    if (!text) return;
+
+    const tempId = `temp-${Date.now()}`;
+    const tempMsg: Message = {
+      _id: tempId,
+      from: "me",
+      body: text,
       timestamp: new Date().toISOString(),
-      status: "pending",
+      status: "sending",
     };
 
-    // Optimistic UI update
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    setMessages((prev) => [...prev, tempMsg]);
     setInput("");
 
     axios
-      .post(`${import.meta.env.VITE_API_URL}/conversations/${waId}/messages`, {
-        body: newMessage.body,
+      .post(`${api}/conversations/${waId}/messages`, {
+        body: text,
       })
       .then((res) => {
-        setMessages((prevMessages) =>
-          prevMessages.map((msg) => (msg._id === newMessage._id ? res.data : msg))
-        );
+        if (res.data?.ok && res.data?.message) {
+          setMessages((prev) =>
+            prev.map((m) => (m._id === tempId ? res.data.message : m))
+          );
+        }
       })
-      .catch((err) => {
-        console.error("Send message error:", err);
-        // Revert optimistic update on failure
-        setMessages((prevMessages) =>
-          prevMessages.filter((msg) => msg._id !== newMessage._id)
+      .catch(() => {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m._id === tempId ? { ...m, status: "failed" } : m
+          )
         );
       });
   };
 
+  const renderTicks = (status: string) => {
+    if (status === "read") return <span className="tick read">✓✓</span>;
+    if (status === "delivered") return <span className="tick">✓✓</span>;
+    if (status === "sent") return <span className="tick">✓</span>;
+    if (status === "sending") return <span className="tick sending">…</span>;
+    if (status === "failed") return <span className="tick failed">!</span>;
+    return null;
+  };
+
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div className="flex-1 flex flex-col">
       {/* Header */}
-      <div className="bg-[#075e54] text-white p-4 font-bold text-lg sticky top-0 z-10 h-16 flex items-center">
-        {name}
+      <div className="chat-header h-16">
+        <div className="avatar">{(name || waId).charAt(0).toUpperCase()}</div>
+        <div className="chat-info">
+          <div className="chat-name">{name || waId}</div>
+          <div className="chat-status">online</div>
+        </div>
       </div>
 
-      {/* Message window */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* Messages */}
+      <div className="chat-messages">
         {messages.map((m) => {
-          const isMe = m.from === "929967673820";
+          const isMe = m.from === "me";
           return (
             <div key={m._id} className={`chat-row ${isMe ? "right" : "left"}`}>
               <div className={`chat-bubble ${isMe ? "sent" : "received"}`}>
@@ -143,20 +156,15 @@ export default function ChatWindow({ waId, name }: ChatWindowProps) {
       </div>
 
       {/* Input */}
-      <div className="chat-input p-4 bg-white flex items-center gap-2 border-t">
+      <div className="chat-input">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Type a message"
           type="text"
-          className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
         />
-        <button
-          onClick={sendMessage}
-          type="button"
-          className="bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition duration-200"
-        >
+        <button onClick={sendMessage} type="button">
           Send
         </button>
       </div>
