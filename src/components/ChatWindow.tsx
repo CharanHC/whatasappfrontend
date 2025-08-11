@@ -40,11 +40,11 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
   }, [waId, api]);
 
   // ✅ Auto-scroll when messages change
-  useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
+ // useEffect(() => {
+   // if (chatEndRef.current) {
+     // chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    //}
+  //}, [messages]);
 
   // ✅ Delete message
   const deleteMessage = (id: string) => {
