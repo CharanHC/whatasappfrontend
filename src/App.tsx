@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "./components/Sidebar";
 import ChatWindow from "./components/ChatWindow";
 import type { Conversation } from "./types";
-import "./index.css"; // Ensure this is imported for base styles
+import "./index.css";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -17,7 +17,7 @@ export default function App() {
       const data = await res.json();
       setConversations(data);
 
-      // If no chat is selected, automatically select the first one
+      // Auto-select first chat if none selected
       if (data.length > 0 && !selectedWaId) {
         setSelectedWaId(data[0].wa_id);
         setSelectedName(data[0].lastMessage?.name || data[0].wa_id);
@@ -29,7 +29,6 @@ export default function App() {
 
   useEffect(() => {
     loadConversations();
-    // Poll every 5 seconds to get updated conversations
     const id = setInterval(loadConversations, 5000);
     return () => clearInterval(id);
   }, []);
