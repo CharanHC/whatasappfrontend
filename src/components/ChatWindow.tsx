@@ -21,8 +21,8 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
   const [input, setInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Set your user ID here. This is crucial for correctly displaying your messages.
-  // Based on your video, your ID seems to be "929967673820". You should confirm this.
+  // Set your user ID here. This must match the 'from' field you want to use for outgoing messages.
+  // I am using the one from the video, but you can change this.
   const myId = "929967673820";
 
   // Fetch messages and poll every 2 seconds
@@ -42,7 +42,6 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
   }, [waId, api]);
 
   // Auto-scroll on messages change
-  // This useEffect is now active and correctly set up to scroll to the bottom
   useEffect(() => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -71,8 +70,7 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
     setInput("");
 
     try {
-      // The API call will now send the message, and the polling will fetch the
-      // new message from the server, ensuring the 'from' field is correct.
+      // Correctly using the waId prop to send the message
       await axios.post(`${api}/conversations/${waId}/messages`, {
         body: text,
       });
@@ -107,7 +105,6 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
         {messages.map((m) => {
-          // This line is now correct and compares the message's 'from' field to your specific ID.
           const isMe = m.from === myId;
           return (
             <div key={m._id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
