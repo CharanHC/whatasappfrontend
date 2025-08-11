@@ -15,7 +15,7 @@ export default function App() {
     try {
       const res = await fetch(`${API}/conversations`);
       const data = await res.json();
-      setConversations(data);
+      setConversations(data || []);
     } catch (err) {
       console.error("Load conversations error:", err);
     }
@@ -28,7 +28,8 @@ export default function App() {
   }, []);
 
   return (
-    <div className="app-container">
+    // full viewport height, two columns
+    <div className="app-root">
       <Sidebar
         conversations={conversations}
         selectedWaId={selectedWaId}
@@ -37,22 +38,14 @@ export default function App() {
           setSelectedName(name);
         }}
       />
-      <div className="chat-area">
+
+      <div className="right-column">
         {selectedWaId ? (
           <ChatWindow waId={selectedWaId} name={selectedName} api={API} />
         ) : (
-         <div className="flex-1 flex flex-col h-full">
-  {selectedWaId ? (
-    <ChatWindow waId={selectedWaId} name={selectedName} api={API} />
-  ) : (
-    <div className="flex-1 flex items-center justify-center bg-[#e5ddd5]">
-      <p className="text-gray-500 text-3xl font-semibold text-center">
-        Select a chat to start messaging
-      </p>
-    </div>
-  )}
-</div>
-
+          <div className="empty-state">
+            <p className="empty-text">Select a chat to start messaging</p>
+          </div>
         )}
       </div>
     </div>
