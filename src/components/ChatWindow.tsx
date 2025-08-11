@@ -21,6 +21,9 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
   const [input, setInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
+  // Set your user ID here. Change this if your WhatsApp number is different.
+  const myId = "929967673820";
+
   // Fetch messages and poll every 2 seconds
   useEffect(() => {
     if (!waId) return;
@@ -42,61 +45,38 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Delete message function with guard for temp messages
   const deleteMessage = (id: string) => {
     if (id.startsWith("temp-")) {
-      // Just remove locally if it's a temp message (not saved to DB)
       setMessages((prev) => prev.filter((m) => m._id !== id));
       return;
     }
 
-    // Optimistic remove from UI
     setMessages((prev) => prev.filter((m) => m._id !== id));
 
     axios
       .delete(`${api}/messages/${id}`)
       .catch((err) => {
         console.error("Delete error:", err);
-        // Optionally, rollback UI removal if delete failed:
-        // fetch latest messages again or re-add message locally
       });
   };
 
-  // Send message with optimistic UI
-  const sendMessage = () => {
+  const sendMessage = async () => {
     const text = input.trim();
     if (!text) return;
 
-    const tempId = `temp-${Date.now()}`;
-    const tempMsg: Message = {
-      _id: tempId,
-      from: "me",
-      body: text,
-      timestamp: new Date().toISOString(),
-      status: "sending",
-    };
-
-    setMessages((prev) => [...prev, tempMsg]);
     setInput("");
 
-    axios
-      .post(`${api}/conversations/${waId}/messages`, {
+    try {
+      await axios.post(`${api}/conversations/${waId}/messages`, {
         body: text,
-      })
-      .then((res) => {
-        if (res.data?.ok && res.data?.message) {
-          setMessages((prev) =>
-            prev.map((m) => (m._id === tempId ? res.data.message : m))
-          );
-        }
-      })
-      .catch(() => {
-        setMessages((prev) =>
-          prev.map((m) =>
-            m._id === tempId ? { ...m, status: "failed" } : m
-          )
-        );
       });
+      // The next poll will retrieve the newly sent message.
+      // We don't need to update the state optimistically.
+      console.log("Message sent successfully");
+    } catch (err) {
+      console.error("Send message error:", err);
+      // Optional: Add a visual indicator for send failure
+    }
   };
 
   const renderTicks = (status: string) => {
@@ -122,7 +102,8 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
       {/* Messages */}
       <div className="chat-messages">
         {messages.map((m) => {
-          const isMe = m.from === "me";
+          // Use the hardcoded myId to check if the message is from me
+          const isMe = m.from === myId;
           return (
             <div key={m._id} className={`chat-row ${isMe ? "right" : "left"}`}>
               <div className={`chat-bubble ${isMe ? "sent" : "received"}`}>
