@@ -1,30 +1,24 @@
-import  { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "./components/Sidebar";
 import ChatWindow from "./components/ChatWindow";
 import type { Conversation } from "./types";
+import "./index.css"; // Ensure this is imported for base styles
 
 const API = import.meta.env.VITE_API_URL;
 
 export default function App() {
-  // State for conversations, selected conversation ID, and name
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedWaId, setSelectedWaId] = useState("");
   const [selectedName, setSelectedName] = useState("");
 
-  /**
-   * Fetches conversations from the API.
-   * After fetching, it automatically selects the first conversation
-   * if none is currently selected.
-   */
   const loadConversations = async () => {
     try {
       const res = await fetch(`${API}/conversations`);
       const data = await res.json();
       setConversations(data);
-      
-      // If there's no selected chat and we have conversations,
-      // automatically select the first one.
-      if (!selectedWaId && data.length > 0) {
+
+      // If no chat is selected, automatically select the first one
+      if (data.length > 0 && !selectedWaId) {
         setSelectedWaId(data[0].wa_id);
         setSelectedName(data[0].lastMessage?.name || data[0].wa_id);
       }
@@ -33,10 +27,9 @@ export default function App() {
     }
   };
 
-  // Effect to load conversations on component mount.
   useEffect(() => {
     loadConversations();
-    // Optional: poll every 5s to keep conversations up-to-date
+    // Poll every 5 seconds to get updated conversations
     const id = setInterval(loadConversations, 5000);
     return () => clearInterval(id);
   }, []);
@@ -51,12 +44,14 @@ export default function App() {
           setSelectedName(name);
         }}
       />
-      <div className="flex-1">
+      <div className="flex-1 flex flex-col">
         {selectedWaId ? (
           <ChatWindow waId={selectedWaId} name={selectedName} api={API} />
         ) : (
-          <div className="h-full flex items-center justify-center text-gray-500">
-            Select a chat to start messaging
+          <div className="h-full flex items-center justify-center text-gray-500 text-lg p-4 text-center">
+            <span className="bg-gray-200 p-4 rounded-lg shadow-sm">
+              Select a chat to start messaging
+            </span>
           </div>
         )}
       </div>
