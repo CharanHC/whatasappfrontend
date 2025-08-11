@@ -41,10 +41,16 @@ export default function App() {
         {selectedWaId ? (
           <ChatWindow waId={selectedWaId} name={selectedName} api={API} />
         ) : (
-          <div className="flex-1 flex items-center justify-center">
-  <p className="text-gray-500 text-3xl font-semibold">
-    Select a chat to start messaging
-  </p>
+         <div className="flex-1 flex flex-col h-full">
+  {selectedWaId ? (
+    <ChatWindow waId={selectedWaId} name={selectedName} api={API} />
+  ) : (
+    <div className="flex-1 flex items-center justify-center bg-[#e5ddd5]">
+      <p className="text-gray-500 text-3xl font-semibold text-center">
+        Select a chat to start messaging
+      </p>
+    </div>
+  )}
 </div>
 
         )}
