@@ -8,30 +8,43 @@ const API = import.meta.env.VITE_API_URL;
 
 export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedWaId, setSelectedWaId] = useState("");
-  const [selectedName, setSelectedName] = useState("");
+  const [selectedWaId, setSelectedWaId] = useState<string>("");
+  const [selectedName, setSelectedName] = useState<string>("");
 
+  // 1) Only fetch & set conversations (no auto-select here)
   const loadConversations = async () => {
     try {
       const res = await fetch(`${API}/conversations`);
       const data = await res.json();
-      setConversations(data);
-
-      // Auto-select first chat if none selected
-      if (data.length > 0 && !selectedWaId) {
-        setSelectedWaId(data[0].wa_id);
-        setSelectedName(data[0].lastMessage?.name || data[0].wa_id);
-      }
+      setConversations(data || []);
     } catch (err) {
       console.error("Load conversations error:", err);
     }
   };
 
+  // 2) Fetch on mount and poll every 5s
   useEffect(() => {
     loadConversations();
     const id = setInterval(loadConversations, 5000);
     return () => clearInterval(id);
-  }, []);
+  }, []); // empty deps -> run once on mount
+
+  // 3) Auto-select the first conversation ONLY when convs change and none is selected
+  useEffect(() => {
+    if (!selectedWaId && conversations.length > 0) {
+      const first = conversations[0];
+      setSelectedWaId(first.wa_id);
+      setSelectedName(first.lastMessage?.name || first.wa_id);
+    }
+    // Only run when conversations OR selectedWaId change
+  }, [conversations, selectedWaId]);
+
+  // Optional: persist selection across reloads (uncomment if desired)
+  // useEffect(() => {
+  //   const saved = localStorage.getItem("selectedWaId");
+  //   if (saved) setSelectedWaId(saved);
+  // }, []);
+  // useEffect(() => { if (selectedWaId) localStorage.setItem("selectedWaId", selectedWaId); }, [selectedWaId]);
 
   return (
     <div className="h-screen flex bg-gray-100">
