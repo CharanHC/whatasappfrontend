@@ -21,11 +21,12 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
   const [input, setInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ Fetch messages and poll every 2 seconds
+  // ✅ Outgoing messages are marked as "me" in backend
+  const myId = "me";
+
+  // Fetch messages and poll every 2s
   useEffect(() => {
     if (!waId) return;
-
-    setMessages([]); // clear old chat messages to avoid scroll jump
 
     const fetchMessages = () => {
       axios
@@ -39,14 +40,13 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
     return () => clearInterval(intervalId);
   }, [waId, api]);
 
-  // ✅ Auto-scroll when messages change
- // useEffect(() => {
-   // if (chatEndRef.current) {
-     // chatEndRef.current.scrollIntoView({ behavior: "smooth" });
-    //}
-  //}, [messages]);
+  // Auto-scroll on new messages
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
-  // ✅ Delete message
   const deleteMessage = (id: string) => {
     if (id.startsWith("temp-")) {
       setMessages((prev) => prev.filter((m) => m._id !== id));
@@ -55,12 +55,11 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
 
     setMessages((prev) => prev.filter((m) => m._id !== id));
 
-    axios.delete(`${api}/messages/${id}`).catch((err) => {
-      console.error("Delete error:", err);
-    });
+    axios
+      .delete(`${api}/messages/${id}`)
+      .catch((err) => console.error("Delete error:", err));
   };
 
-  // ✅ Send message
   const sendMessage = async () => {
     const text = input.trim();
     if (!text) return;
@@ -71,13 +70,12 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
       await axios.post(`${api}/conversations/${waId}/messages`, {
         body: text,
       });
-      console.log("Message sent successfully");
+      console.log("Message sent successfully to", waId);
     } catch (err) {
       console.error("Send message error:", err);
     }
   };
 
-  // ✅ Ticks rendering
   const renderTicks = (status: string) => {
     if (status === "read") return <span className="tick read">✓✓</span>;
     if (status === "delivered") return <span className="tick">✓✓</span>;
@@ -103,9 +101,12 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
         {messages.map((m) => {
-          const isMe = m.from === "me"; // ✅ detect outgoing by "me"
+          const isMe = m.from === myId;
           return (
-            <div key={m._id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+            <div
+              key={m._id}
+              className={`flex ${isMe ? "justify-end" : "justify-start"}`}
+            >
               <div
                 className={`p-3 rounded-xl max-w-lg shadow-sm ${
                   isMe
