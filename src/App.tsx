@@ -16,6 +16,11 @@ export default function App() {
       const res = await fetch(`${API}/conversations`);
       const data = await res.json();
       setConversations(data);
+
+      if (data.length > 0 && !selectedWaId) {
+        setSelectedWaId(data[0].wa_id);
+        setSelectedName(data[0].lastMessage?.name || data[0].wa_id);
+      }
     } catch (err) {
       console.error("Load conversations error:", err);
     }
@@ -28,7 +33,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="app-container">
+    <div className="h-screen flex bg-gray-100">
       <Sidebar
         conversations={conversations}
         selectedWaId={selectedWaId}
@@ -37,11 +42,11 @@ export default function App() {
           setSelectedName(name);
         }}
       />
-      <div className="chat-area">
+      <div className="flex-1 flex flex-col">
         {selectedWaId ? (
           <ChatWindow waId={selectedWaId} name={selectedName} api={API} />
         ) : (
-          <div className="empty-chat">
+          <div className="flex-1 flex items-center justify-center text-gray-500 text-2xl font-semibold">
             Select a chat to start messaging
           </div>
         )}
