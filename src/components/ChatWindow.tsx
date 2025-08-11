@@ -15,18 +15,32 @@ interface ChatWindowProps {
   name: string;
 }
 
-// The API URL from the main App.tsx file
-const API = "https://whatsapp-fzn0.onrender.com";
-
 export default function ChatWindow({ waId, name }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Set the user's ID to match the number in your screenshot
-  const myId = "929967673820";
+  // Fetch messages and poll every 2 seconds
+  useEffect(() => {
+    if (!waId) return;
 
-  // Helper function to render tick icons for message status
+    const fetchMessages = () => {
+      axios
+        .get(`${import.meta.env.VITE_API_URL}/conversations/${waId}/messages`)
+        .then((res) => setMessages(res.data))
+        .catch((err) => console.error("Fetch messages error:", err));
+    };
+
+    fetchMessages();
+    const intervalId = setInterval(fetchMessages, 2000);
+    return () => clearInterval(intervalId);
+  }, [waId]);
+
+  // Auto-scroll on messages change
+  //useEffect(() => {
+   // chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  //}, [messages]);
+
   const renderTicks = (status: string) => {
     switch (status) {
       case "sent":
@@ -40,10 +54,9 @@ export default function ChatWindow({ waId, name }: ChatWindowProps) {
     }
   };
 
-  // Delete a message
   const deleteMessage = (_id: string) => {
     axios
-      .delete(`${API}/messages/${_id}`)
+      .delete(`${import.meta.env.VITE_API_URL}/messages/${_id}`)
       .then(() => {
         setMessages((prevMessages) =>
           prevMessages.filter((msg) => msg._id !== _id)
@@ -51,45 +64,39 @@ export default function ChatWindow({ waId, name }: ChatWindowProps) {
       })
       .catch((err) => console.error("Delete message error:", err));
   };
-
-  // Fetch messages and poll every 2 seconds
-  useEffect(() => {
-    if (!waId) return;
-
-    const fetchMessages = () => {
-      axios
-        .get(`${API}/conversations/${waId}/messages`)
-        .then((res) => setMessages(res.data))
-        .catch((err) => console.error("Fetch messages error:", err));
-    };
-
-    fetchMessages();
-    const intervalId = setInterval(fetchMessages, 2000);
-    return () => clearInterval(intervalId);
-  }, [waId]);
-
-  // Auto-scroll on messages change
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const sendMessage = async () => {
+  
+  const sendMessage = () => {
     if (!input.trim()) return;
 
-    const messageBody = input;
+    const myId = "929967673820";
+    const newMessage = {
+      _id: `temp-${Date.now()}`,
+      from: myId,
+      body: input,
+      timestamp: new Date().toISOString(),
+      status: "pending",
+    };
+
+    // Optimistic UI update
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
     setInput("");
 
-    try {
-      // Make the actual API call to send the message
-      await axios.post(`${API}/conversations/${waId}/messages`, {
-        body: messageBody,
+    axios
+      .post(`${import.meta.env.VITE_API_URL}/conversations/${waId}/messages`, {
+        body: newMessage.body,
+      })
+      .then((res) => {
+        setMessages((prevMessages) =>
+          prevMessages.map((msg) => (msg._id === newMessage._id ? res.data : msg))
+        );
+      })
+      .catch((err) => {
+        console.error("Send message error:", err);
+        // Revert optimistic update on failure
+        setMessages((prevMessages) =>
+          prevMessages.filter((msg) => msg._id !== newMessage._id)
+        );
       });
-
-      // The message is successfully sent, the next poll will update the UI
-      console.log("Message sent successfully");
-    } catch (err) {
-      console.error("Send message error:", err);
-    }
   };
 
   return (
@@ -102,8 +109,7 @@ export default function ChatWindow({ waId, name }: ChatWindowProps) {
       {/* Message window */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((m) => {
-          // Check if the message is from me using the hardcoded ID
-          const isMe = m.from === myId;
+          const isMe = m.from === "929967673820";
           return (
             <div key={m._id} className={`chat-row ${isMe ? "right" : "left"}`}>
               <div className={`chat-bubble ${isMe ? "sent" : "received"}`}>
