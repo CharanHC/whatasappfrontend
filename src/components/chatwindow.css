@@ -1,114 +1,68 @@
-.chat-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background-color: #075e54; /* WhatsApp dark green */
-  color: white;
-  padding: 10px;
-}
-.avatar {
-  width: 40px;
-  height: 40px;
-  background-color: #25d366; /* WhatsApp's default green for profile pics */
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-}
-.chat-info .chat-name {
-  font-weight: bold;
-}
-.chat-status {
-  font-size: 12px;
-  color: #d9fdd3; /* Lighter green for status */
-}
-
-.chat-messages {
-  flex: 1;
-  padding: 15px;
-  background-color: #e5ddd5; /* WhatsApp chat background color */
-  overflow-y: auto;
-  /* You can add a background image here for a more authentic look if desired */
-  /* background-image: url('path/to/whatsapp-background.png'); */
-  /* background-size: cover; */
-}
-
+/* chatwindow.css */
 .chat-row {
   display: flex;
-  margin-bottom: 8px;
 }
+
 .chat-row.right {
   justify-content: flex-end;
 }
-.chat-row.left {
-  justify-content: flex-start;
-}
 
 .chat-bubble {
-  max-width: 70%;
   padding: 8px 12px;
-  border-radius: 7px;
+  border-radius: 12px;
+  max-width: 75%;
   position: relative;
-  color: #303030; /* Dark text for readability on light bubbles */
-  box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13); /* Subtle shadow like WhatsApp */
+  font-size: 14px;
 }
+
 .chat-bubble.sent {
-  background-color: #dcf8c6; /* WhatsApp outgoing message green */
+  background-color: #dcf8c6;
+  border-bottom-right-radius: 2px;
 }
+
 .chat-bubble.received {
-  background-color: white; /* WhatsApp incoming message white */
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-bottom-left-radius: 2px;
+}
+
+.chat-text {
+  word-wrap: break-word;
 }
 
 .chat-meta {
-  font-size: 11px;
-  color: #667781;
   display: flex;
   align-items: center;
-  gap: 3px;
-  margin-top: 2px;
-  justify-content: flex-end; /* Align time/ticks to the right within the bubble */
-}
-.tick {
-  font-size: 12px;
-}
-.tick.read {
-  color: #34b7f1; /* blue ticks for read */
-}
-.tick:not(.read) { /* For delivered/sent ticks */
-  color: #667781; /* Grey ticks */
+  justify-content: flex-end;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #888;
 }
 
-.chat-input {
-  display: flex;
-  gap: 8px;
-  padding: 10px;
-  background: #f0f0f0; /* Lighter background for input area */
-  border-top: 1px solid #ddd;
+.chat-meta .time {
+  margin-right: 4px;
 }
-.chat-input input {
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  outline: none;
-  background-color: white;
+
+.tick-icon {
+  font-size: 12px;
 }
-.chat-input button {
-  background-color: #075e54; /* Dark green send button */
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  cursor: pointer;
+
+.tick-icon.read {
+  color: #34b7f1;
 }
+
 .delete-btn {
   background: none;
   border: none;
-  color: red;
+  color: #888;
+  font-size: 12px;
   cursor: pointer;
-  font-size: 14px;
+  margin-left: 8px;
 }
-.delete-btn:hover {
-  color: darkred;
+
+/* Responsive styles */
+@media (max-width: 640px) {
+  .chat-bubble {
+    max-width: 90%;
+  }
 }
