@@ -1,4 +1,4 @@
-import React from "react";
+
 import type { Conversation } from "../types";
 
 interface SidebarProps {
@@ -46,7 +46,7 @@ export default function Sidebar({ conversations, selectedWaId, onSelect }: Sideb
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-500 truncate">{lastMsg}</p>
+              <p className="text-sm text-gray-600 truncate">{lastMsg}</p>
             </div>
           </div>
         );
