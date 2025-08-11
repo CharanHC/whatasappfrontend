@@ -4,8 +4,8 @@ import ChatWindow from "./components/ChatWindow";
 import type { Conversation } from "./types";
 
 
-// The new API URL provided by you
-const API = "https://whatsapp-fzn0.onrender.com";
+
+const API = import.meta.env.VITE_API_URL;
 
 export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -44,7 +44,7 @@ export default function App() {
           <ChatWindow waId={selectedWaId} name={selectedName} />
         ) : (
           <div className="h-full flex items-center justify-center text-gray-500">
-            Select a conversation to start chatting
+            Select a chat to start messaging
           </div>
         )}
       </div>
