@@ -1,188 +1,150 @@
-.app-container {
-  display: flex;
-  height: 100vh;
-  background-color: #e5ddd5;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ensure the app fills the viewport */
+:root, html, body, #root {
+  height: 100%;
 }
 
+/* ---------- App layout ---------- */
+.app-root {
+  @apply flex h-screen overflow-hidden;
+}
+
+/* ---------- Sidebar ---------- */
 .sidebar {
-  width: 30%;
-  border-right: 1px solid #ddd;
-  background-color: #fff;
-  display: flex;
-  flex-direction: column;
+  @apply w-96 bg-white border-r flex flex-col min-w-[260px] max-w-[420px];
 }
 
 .sidebar-header {
-  background-color: #075e54;
-  color: white;
-  padding: 1rem;
-  font-weight: bold;
-  font-size: 1.2rem;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  @apply bg-[#075e54] text-white p-4 font-bold text-lg sticky top-0 z-10;
+}
+
+.sidebar-list {
+  @apply flex-1 overflow-y-auto -webkit-overflow-scrolling-touch;
 }
 
 .sidebar-item {
-  display: flex;
-  gap: 1rem;
-  padding: 0.8rem 1rem;
-  cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
-}
-.sidebar-item:hover {
-  background-color: #f5f5f5;
+  @apply flex gap-4 items-center p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50;
 }
 .sidebar-item.selected {
-  background-color: #e0e0e0;
+  @apply bg-gray-200;
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
-  background-color: #25d366;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  color: white;
+  @apply w-11 h-11 rounded-full bg-green-500 text-white flex items-center justify-center font-bold;
 }
 
-.chat-info {
-  flex: 1;
-  min-width: 0;
+.meta {
+  @apply flex-1 min-w-0;
 }
-.chat-top {
-  display: flex;
-  justify-content: space-between;
+.meta-top {
+  @apply flex justify-between items-baseline;
 }
-.chat-name {
-  font-weight: bold;
+.meta-name {
+  @apply font-semibold truncate;
 }
-.chat-last {
-  font-size: 0.85rem;
-  color: gray;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.meta-time {
+  @apply text-xs text-gray-500;
+}
+.meta-last {
+  @apply text-sm text-gray-600 truncate;
 }
 
-.chat-area {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+/* ---------- Right column / Chat ---------- */
+.right-column {
+  @apply flex-1 flex flex-col min-w-0;
 }
 
+.empty-state {
+  @apply flex-1 flex items-center justify-center bg-[#ece5dd];
+}
+.empty-text {
+  @apply text-gray-600 text-3xl font-semibold text-center;
+}
+
+/* Chat window */
 .chat-window {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+  @apply flex flex-col h-full bg-[#ece5dd];
 }
 
 .chat-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.8rem 1rem;
-  background-color: #075e54;
-  color: white;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  @apply flex items-center gap-4 p-3 bg-[#075e54] text-white sticky top-0 z-10;
+}
+.chat-avatar {
+  @apply w-10 h-10 rounded-full bg-green-500 flex items-center justify-center font-semibold;
+}
+.chat-header-meta {
+  @apply flex flex-col;
+}
+.chat-name {
+  @apply font-semibold;
+}
+.chat-status {
+  @apply text-sm opacity-80;
 }
 
-.header-name {
-  font-weight: bold;
-}
-.header-status {
-  font-size: 0.8rem;
-  opacity: 0.8;
-}
-
+/* messages area — only this scrolls in right column */
 .chat-messages {
-  flex: 1;
-  padding: 1rem;
-  overflow-y: auto;
-  background-color: #efeae2;
+  @apply flex-1 overflow-y-auto p-5 flex flex-col gap-4;
 }
 
+/* message rows */
 .message-row {
-  display: flex;
-  margin-bottom: 0.5rem;
+  @apply flex;
 }
-.message-row.sent {
-  justify-content: flex-end;
+.message-row.msg-me {
+  @apply justify-end;
 }
-.message-row.received {
-  justify-content: flex-start;
-}
-
-.message-bubble {
-  padding: 0.5rem 0.8rem;
-  border-radius: 7px;
-  max-width: 60%;
-  background-color: white;
-  position: relative;
-}
-.message-row.sent .message-bubble {
-  background-color: #dcf8c6;
+.message-row.msg-them {
+  @apply justify-start;
 }
 
-.message-meta {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.2rem;
-  font-size: 0.75rem;
-  color: gray;
+.bubble {
+  @apply max-w-[60%] p-3 rounded-xl bg-white;
 }
-
+.bubble-me {
+  @apply bg-[#dcf8c6] rounded-br-none;
+}
+.bubble-them {
+  @apply bg-white rounded-bl-none;
+}
+.bubble-text {
+  @apply break-words;
+}
+.bubble-meta {
+  @apply flex items-center gap-2 mt-2 text-xs text-gray-500;
+}
 .delete-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: gray;
+  @apply bg-transparent border-0 cursor-pointer text-gray-500;
 }
 
+/* input area */
 .chat-input {
-  display: flex;
-  padding: 0.8rem;
-  background-color: #f0f0f0;
-  border-top: 1px solid #ddd;
+  @apply p-3 bg-gray-100 border-t border-gray-200 flex gap-2 sticky bottom-0 z-10;
 }
 .chat-input input {
-  flex: 1;
-  padding: 0.5rem;
-  border-radius: 20px;
-  border: 1px solid #ccc;
+  @apply flex-1 rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500;
 }
-.chat-input button {
-  margin-left: 0.5rem;
-  background-color: #25d366;
-  border: none;
-  color: white;
-  padding: 0 1rem;
-  border-radius: 20px;
-  cursor: pointer;
+.send-btn {
+  @apply w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center;
 }
 
+/* Ticks */
 .tick {
-  font-size: 0.8rem;
+  @apply text-sm;
 }
 .tick.read {
-  color: #34b7f1;
+  color: #34b7f1; /* use raw color to get exact blue */
 }
 
-body {
-  margin: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.tick {
-  font-size: 0.9em;
-}
-
-.tick.read {
-  color: #34b7f1;
+/* responsive minor tweak */
+@media (max-width: 800px) {
+  .sidebar {
+    @apply w-full h-full;
+  }
+  .app-root {
+    @apply flex-col;
+  }
 }
