@@ -15,11 +15,16 @@ interface ChatWindowProps {
   name: string;
 }
 
+// The API URL from the main App.tsx file
+const API = "https://whatsapp-fzn0.onrender.com";
+
 export default function ChatWindow({ waId, name }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement | null>(null);
-  const myId = "my_id_placeholder"; // Replace with the actual user ID.
+
+  // Set the user's ID to match the number in your screenshot
+  const myId = "929967673820";
 
   // Helper function to render tick icons for message status
   const renderTicks = (status: string) => {
@@ -38,7 +43,7 @@ export default function ChatWindow({ waId, name }: ChatWindowProps) {
   // Delete a message
   const deleteMessage = (_id: string) => {
     axios
-      .delete(`${import.meta.env.VITE_API_URL}/messages/${_id}`)
+      .delete(`${API}/messages/${_id}`)
       .then(() => {
         setMessages((prevMessages) =>
           prevMessages.filter((msg) => msg._id !== _id)
@@ -53,7 +58,7 @@ export default function ChatWindow({ waId, name }: ChatWindowProps) {
 
     const fetchMessages = () => {
       axios
-        .get(`${import.meta.env.VITE_API_URL}/conversations/${waId}/messages`)
+        .get(`${API}/conversations/${waId}/messages`)
         .then((res) => setMessages(res.data))
         .catch((err) => console.error("Fetch messages error:", err));
     };
@@ -68,36 +73,23 @@ export default function ChatWindow({ waId, name }: ChatWindowProps) {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const newMessage = {
-      _id: Date.now().toString(), // Temporary ID
-      from: myId,
-      body: input,
-      timestamp: new Date().toISOString(),
-      status: "sending", // Temporary status
-    };
-
-    // Optimistically update the UI
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    const messageBody = input;
     setInput("");
 
-    axios
-      .post(`${import.meta.env.VITE_API_URL}/conversations/${waId}/messages`, {
-        body: newMessage.body,
-      })
-      .then(() => {
-        // The message is successfully sent, the next poll will update the status
-        console.log("Message sent successfully");
-      })
-      .catch((err) => {
-        console.error("Send message error:", err);
-        // If the message fails, revert the state
-        setMessages((prevMessages) =>
-          prevMessages.filter((msg) => msg._id !== newMessage._id)
-        );
+    try {
+      // Make the actual API call to send the message
+      await axios.post(`${API}/conversations/${waId}/messages`, {
+        body: messageBody,
       });
+
+      // The message is successfully sent, the next poll will update the UI
+      console.log("Message sent successfully");
+    } catch (err) {
+      console.error("Send message error:", err);
+    }
   };
 
   return (
@@ -110,6 +102,7 @@ export default function ChatWindow({ waId, name }: ChatWindowProps) {
       {/* Message window */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((m) => {
+          // Check if the message is from me using the hardcoded ID
           const isMe = m.from === myId;
           return (
             <div key={m._id} className={`chat-row ${isMe ? "right" : "left"}`}>
