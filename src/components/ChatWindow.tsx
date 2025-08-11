@@ -21,11 +21,7 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
   const [input, setInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
-  // Set your user ID here. This must match the 'from' field you want to use for outgoing messages.
-  // I am using the one from the video, but you can change this.
-  const myId = "929967673820";
-
-  // Fetch messages and poll every 2 seconds
+  // Fetch messages & poll every 2 seconds
   useEffect(() => {
     if (!waId) return;
 
@@ -41,11 +37,9 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
     return () => clearInterval(intervalId);
   }, [waId, api]);
 
-  // Auto-scroll on messages change
+  // Auto-scroll on message update
   useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const deleteMessage = (id: string) => {
@@ -58,23 +52,16 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
 
     axios
       .delete(`${api}/messages/${id}`)
-      .catch((err) => {
-        console.error("Delete error:", err);
-      });
+      .catch((err) => console.error("Delete error:", err));
   };
 
   const sendMessage = async () => {
     const text = input.trim();
     if (!text) return;
-
     setInput("");
 
     try {
-      // Correctly using the waId prop to send the message
-      await axios.post(`${api}/conversations/${waId}/messages`, {
-        body: text,
-      });
-      console.log("Message sent successfully");
+      await axios.post(`${api}/conversations/${waId}/messages`, { body: text });
     } catch (err) {
       console.error("Send message error:", err);
     }
@@ -96,7 +83,7 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
         <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold">
           {(name || waId).charAt(0).toUpperCase()}
         </div>
-        <div className="chat-info">
+        <div>
           <div className="font-semibold text-lg">{name || waId}</div>
           <div className="text-sm opacity-80">online</div>
         </div>
@@ -105,25 +92,28 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2">
         {messages.map((m) => {
-          const isMe = m.from === myId;
+          const isMe = m.from === "me";
           return (
             <div key={m._id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-              <div className={`p-3 rounded-xl max-w-lg shadow-sm
-                  ${isMe ? "bg-[#dcf8c6] text-black rounded-br-none" : "bg-white text-black rounded-bl-none"}`}>
+              <div
+                className={`p-3 rounded-xl max-w-lg shadow-sm ${
+                  isMe
+                    ? "bg-[#dcf8c6] text-black rounded-br-none"
+                    : "bg-white text-black rounded-bl-none"
+                }`}
+              >
                 <div className="text-sm break-words">{m.body}</div>
                 <div className="flex items-center text-xs text-gray-500 mt-1 justify-end gap-1">
-                  <span className="time">
+                  <span>
                     {new Date(m.timestamp).toLocaleTimeString([], {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}
                   </span>
                   {isMe && renderTicks(m.status)}
-
-                  {/* Delete Button */}
                   {isMe && (
                     <button
-                      className="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                      className="text-xs text-gray-400 hover:text-red-500"
                       onClick={() => deleteMessage(m._id)}
                       title="Delete message"
                       type="button"
@@ -139,24 +129,22 @@ export default function ChatWindow({ waId, name, api }: ChatWindowProps) {
         <div ref={chatEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="p-4 bg-gray-100 border-t border-gray-300 flex gap-2">
+      {/* Footer */}
+      <div className="p-4 bg-gray-100 border-t border-gray-300 flex gap-2 sticky bottom-0">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Type a message..."
           type="text"
-          className="flex-1 rounded-full border-2 border-gray-300 py-2 px-4 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all text-sm"
+          className="flex-1 rounded-full border-2 border-gray-300 py-2 px-4 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
         />
         <button
           onClick={sendMessage}
           type="button"
-          className="bg-green-500 text-white rounded-full p-3 shadow-md hover:bg-green-600 transition-colors duration-200"
+          className="bg-green-500 text-white rounded-full p-3 hover:bg-green-600 transition-colors duration-200"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-          </svg>
+          ➤
         </button>
       </div>
     </div>
