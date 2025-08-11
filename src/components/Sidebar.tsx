@@ -24,15 +24,14 @@ export default function Sidebar({ conversations, selectedWaId, onSelect }: Sideb
           <div
             key={conv.wa_id}
             onClick={() => onSelect(conv.wa_id, name)}
-            className={`flex items-center gap-4 px-5 py-4 cursor-pointer border-b border-gray-200 transition-colors duration-200 ease-in-out
-              ${isSelected ? "bg-gray-200 hover:bg-gray-300" : "hover:bg-gray-100"}`}
+            className={`flex items-center gap-4 px-5 py-4 cursor-pointer border-b border-gray-200 transition-colors duration-200 ${
+              isSelected ? "bg-gray-200" : "hover:bg-gray-100"
+            }`}
           >
-            {/* Avatar */}
-            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold text-lg shadow-md">
+            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-green-500 flex items-center justify-center text-white font-semibold text-lg">
               {name.charAt(0).toUpperCase()}
             </div>
 
-            {/* Chat info */}
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-center mb-1">
                 <span className="font-bold text-base text-gray-800 truncate">{name}</span>
