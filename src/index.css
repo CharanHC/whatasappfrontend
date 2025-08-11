@@ -1,150 +1,188 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Ensure the app fills the viewport */
-:root, html, body, #root {
+/* Ensure root and body fill viewport so flex centering works */
+:root, html, body {
   height: 100%;
 }
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  background: #f0f0f0;
+}
 
-/* ---------- App layout ---------- */
+/* App root: left sidebar + right column */
 .app-root {
-  @apply flex h-screen overflow-hidden;
+  display: flex;
+  height: 100vh;        /* take full viewport height */
+  overflow: hidden;     /* prevent body scroll; each column manages its own scrolling */
 }
 
-/* ---------- Sidebar ---------- */
+/* ---------------- Sidebar ---------------- */
 .sidebar {
-  @apply w-96 bg-white border-r flex flex-col min-w-[260px] max-w-[420px];
+  width: 360px;             /* fixed sidebar width, similar to WhatsApp web */
+  background: #fff;
+  border-right: 1px solid #e6e6e6;
+  display: flex;
+  flex-direction: column;
+  min-width: 280px;
+  max-width: 420px;
 }
 
+/* header sticky at top of sidebar */
 .sidebar-header {
-  @apply bg-[#075e54] text-white p-4 font-bold text-lg sticky top-0 z-10;
+  background-color: #075e54;
+  color: white;
+  padding: 18px;
+  font-weight: 700;
+  font-size: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
+/* The list area scrolls independently in sidebar */
 .sidebar-list {
-  @apply flex-1 overflow-y-auto -webkit-overflow-scrolling-touch;
+  flex: 1;                 /* take remaining height under header */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
+/* contact row */
 .sidebar-item {
-  @apply flex gap-4 items-center p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid #f2f2f2;
+  cursor: pointer;
 }
-.sidebar-item.selected {
-  @apply bg-gray-200;
-}
+.sidebar-item:hover { background: #fafafa; }
+.sidebar-item.selected { background: #f1f1f1; }
 
 .avatar {
-  @apply w-11 h-11 rounded-full bg-green-500 text-white flex items-center justify-center font-bold;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #25d366;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
 }
 
-.meta {
-  @apply flex-1 min-w-0;
-}
-.meta-top {
-  @apply flex justify-between items-baseline;
-}
-.meta-name {
-  @apply font-semibold truncate;
-}
-.meta-time {
-  @apply text-xs text-gray-500;
-}
-.meta-last {
-  @apply text-sm text-gray-600 truncate;
-}
+/* meta text */
+.meta { flex: 1; min-width: 0; }
+.meta-top { display:flex; justify-content: space-between; align-items: baseline; }
+.meta-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta-time { font-size: 0.8rem; color: #8b8b8b; margin-left: 8px; }
+.meta-last { color: #6b6b6b; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* ---------- Right column / Chat ---------- */
+/* ---------------- Right column / Chat ---------------- */
 .right-column {
-  @apply flex-1 flex flex-col min-w-0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
+/* Empty state center */
 .empty-state {
-  @apply flex-1 flex items-center justify-center bg-[#ece5dd];
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ece5dd;
 }
 .empty-text {
-  @apply text-gray-600 text-3xl font-semibold text-center;
+  color: #4b4b4b;
+  font-size: 28px;
+  font-weight: 600;
+  text-align: center;
 }
 
 /* Chat window */
 .chat-window {
-  @apply flex flex-col h-full bg-[#ece5dd];
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #ece5dd;
 }
 
+/* header sticky */
 .chat-header {
-  @apply flex items-center gap-4 p-3 bg-[#075e54] text-white sticky top-0 z-10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #075e54;
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
-.chat-avatar {
-  @apply w-10 h-10 rounded-full bg-green-500 flex items-center justify-center font-semibold;
-}
-.chat-header-meta {
-  @apply flex flex-col;
-}
-.chat-name {
-  @apply font-semibold;
-}
-.chat-status {
-  @apply text-sm opacity-80;
-}
+.chat-avatar { width: 40px; height: 40px; border-radius: 50%; background: #25d366; display:flex; align-items:center; justify-content:center; font-weight:700; }
+.chat-header-meta { display:flex; flex-direction: column; }
+.chat-name { font-weight:600; }
+.chat-status { font-size: 0.85rem; opacity: 0.9; }
 
-/* messages area — only this scrolls in right column */
+/* messages area: THIS is the only scrollable area for right column */
 .chat-messages {
-  @apply flex-1 overflow-y-auto p-5 flex flex-col gap-4;
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 /* message rows */
-.message-row {
-  @apply flex;
-}
-.message-row.msg-me {
-  @apply justify-end;
-}
-.message-row.msg-them {
-  @apply justify-start;
-}
+.message-row { display:flex; }
+.message-row.msg-me { justify-content: flex-end; }
+.message-row.msg-them { justify-content: flex-start; }
 
 .bubble {
-  @apply max-w-[60%] p-3 rounded-xl bg-white;
+  max-width: 60%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 0 0 0 rgba(0,0,0,0.03);
 }
-.bubble-me {
-  @apply bg-[#dcf8c6] rounded-br-none;
-}
-.bubble-them {
-  @apply bg-white rounded-bl-none;
-}
-.bubble-text {
-  @apply break-words;
-}
-.bubble-meta {
-  @apply flex items-center gap-2 mt-2 text-xs text-gray-500;
-}
-.delete-btn {
-  @apply bg-transparent border-0 cursor-pointer text-gray-500;
-}
+.bubble-me { background: #dcf8c6; border-bottom-right-radius: 4px; }
+.bubble-them { background: #fff; border-bottom-left-radius: 4px; }
 
-/* input area */
+.bubble-text { white-space: pre-wrap; word-break: break-word; }
+.bubble-meta { display:flex; align-items:center; gap:8px; margin-top:6px; font-size: 0.8rem; color: #6b6b6b; }
+.delete-btn { background: none; border: none; cursor:pointer; color:#6b6b6b; }
+
+/* input area sticky to bottom */
 .chat-input {
-  @apply p-3 bg-gray-100 border-t border-gray-200 flex gap-2 sticky bottom-0 z-10;
+  padding: 12px 16px;
+  background: #f2f2f2;
+  display:flex;
+  gap: 8px;
+  align-items:center;
+  border-top: 1px solid #e2e2e2;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
 }
 .chat-input input {
-  @apply flex-1 rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500;
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 24px;
+  border: 1px solid #d1d1d1;
+  outline: none;
 }
 .send-btn {
-  @apply w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center;
+  width: 44px; height: 44px; border-radius: 999px;
+  background: #25d366; border: none; color: white; cursor: pointer;
 }
 
-/* Ticks */
-.tick {
-  @apply text-sm;
-}
-.tick.read {
-  color: #34b7f1; /* use raw color to get exact blue */
-}
+/* tick colors */
+.tick { font-size: 0.9rem; }
+.tick.read { color: #34b7f1; }
 
-/* responsive minor tweak */
+/* small screens fallback */
 @media (max-width: 800px) {
-  .sidebar {
-    @apply w-full h-full;
-  }
-  .app-root {
-    @apply flex-col;
-  }
+  .sidebar { width: 100%; height: 100vh; position: relative; }
+  .app-root { flex-direction: column; }
 }
